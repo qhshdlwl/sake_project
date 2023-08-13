@@ -8,43 +8,69 @@ from selenium.common.exceptions import TimeoutException
 import time
 import os
 
-
-
+# Chrome driver version 103.0.5060.134
+# Chrome browser version 103.0.5060.53
 url = "http://sake09.com/shop/"
 driver = webdriver.Chrome()
 driver.get(url)
 image_download_path = 'C:\\Users\\qhshd\\sake_project\\dataset\\sake\\images'
-num_of_images_to_save = 5
+num_of_images_to_save = 20
+desired_num_of_pages = 3  # Set the desired number of pages to scrape
 
 # 페이지 좌측에 "일본술" 카테고리 클릭
 iframe = driver.find_element(By.XPATH, '//*[@id="leftcolumn"]/iframe')
 driver.switch_to.frame(iframe)
 category = driver.find_element(By.PARTIAL_LINK_TEXT, '일본술')
 category.click()
+print('일본술 페이지로 이동 성공')
 
+# Initialize variables
+image_total_number = 0
+current_page = 1
+image_url_list = []
 
-# 현재 페이지 : 상품 20개 출력되는 페이지
-images = driver.find_elements(By.CLASS_NAME, 'picture') # 20개의 element 리스트로 저장
-print(f'"일본술" 페이지에 있는 picture class의 개수 : {len(images)}') # 사진 20개 따오는지 확인
-images[0].click()
+while current_page <= desired_num_of_pages:
+    images = driver.find_elements(By.CLASS_NAME, 'picture')
+    if image_total_number >= len(images):
+        # Click the "次へ>>" link to go to the next page
+        next_page_link = driver.find_element(By.XPATH, '//a[contains(text(), "次へ>>")]')
+        next_page_link.click()
 
-
-# 상세 페이지
-driver.find_element(By.CLASS_NAME, 'picture').click()
-
-# Wait for the modal content to be visible
-try:
-    wait = WebDriverWait(driver, 20)  # Increased wait time
-    image_element = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="facebox"]/div/div/div/img')))
+        # Update the current page number and reset the image_total_number
+        current_page += 1
+        image_total_number = 0
+        continue
     
-    # Get the image source URL
-    image_url = image_element.get_attribute("src")
-    print("Image URL:", image_url)
+    image = images[image_total_number]
+    time.sleep(2)
+    image.click()  # 상세정보 페이지로 이동
+    print('상세정보 페이지 이동 성공')
 
-    driver.back()
-    driver.quit()
+    try:
+        driver.find_element(By.CLASS_NAME, 'picture').click()  # 상세정보에서 이미지 클릭
+        print('상세정보 이미지 클릭 성공')
+        wait = WebDriverWait(driver, 10)  # wait time은 하면서 조정 필요.
+        image_to_download = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="facebox"]/div/div/div/img')))
+        print('다운받을 이미지 element로 가져오기 성공')
 
-except TimeoutException:
-    print("Modal content did not become visible within the specified timeout.")
+        # 확대 이미지 URL 얻기
+        image_url = image_to_download.get_attribute("src")
+        image_url_list.append(image_url)
+        print("Image URL:", image_url)
+
+        driver.back()
+        print('일본술 페이지로 뒤로가기 성공')
+        image_total_number += 1
+        print(f'현재 image 개수: {image_total_number}')
+
+    except TimeoutException:
+        print("TimeOut.")
+
+    # Go back to the list of images
     driver.back()
-    driver.quit()
+    print('상품 목록 페이지로 뒤로가기 성공')
+
+print(image_url_list)
+print(len(image_url_list))
+time.sleep(2)
+driver.quit()
