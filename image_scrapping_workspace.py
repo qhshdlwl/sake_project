@@ -10,19 +10,19 @@ import os
 
 # Chrome driver version 103.0.5060.134
 # Chrome browser version 103.0.5060.53
-url = "http://sake09.com/shop/"
+url = 'http://sake09.com/shop/products/list.php?category_id=15'
 driver = webdriver.Chrome()
 driver.get(url)
 image_download_path = 'C:\\Users\\qhshd\\sake_project\\dataset\\sake\\images'
 num_of_images_to_save = 20
 desired_num_of_pages = 3  # Set the desired number of pages to scrape
 
-# 페이지 좌측에 "일본술" 카테고리 클릭
-iframe = driver.find_element(By.XPATH, '//*[@id="leftcolumn"]/iframe')
-driver.switch_to.frame(iframe)
-category = driver.find_element(By.PARTIAL_LINK_TEXT, '일본술')
-category.click()
-print('일본술 페이지로 이동 성공')
+# # 페이지 좌측에 "일본술" 카테고리 클릭
+# iframe = driver.find_element(By.XPATH, '//*[@id="leftcolumn"]/iframe')
+# driver.switch_to.frame(iframe)
+# category = driver.find_element(By.PARTIAL_LINK_TEXT, '일본술')
+# category.click()
+# print('일본술 페이지로 이동 성공')
 
 # Initialize variables
 image_total_number = 0
@@ -33,7 +33,9 @@ while current_page <= desired_num_of_pages:
     images = driver.find_elements(By.CLASS_NAME, 'picture')
     if image_total_number >= len(images):
         # Click the "次へ>>" link to go to the next page
-        next_page_link = driver.find_element(By.XPATH, '//a[contains(text(), "次へ>>")]')
+        navi = driver.find_element(By.CLASS_NAME, 'navi')
+        next_page_links = navi.find_elements(By.TAG_NAME, 'a')
+        next_page_link = next_page_links[-1]
         next_page_link.click()
 
         # Update the current page number and reset the image_total_number
@@ -72,5 +74,4 @@ while current_page <= desired_num_of_pages:
 
 print(image_url_list)
 print(len(image_url_list))
-time.sleep(2)
-driver.quit()
+

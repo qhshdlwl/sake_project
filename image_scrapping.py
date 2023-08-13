@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,48 +7,55 @@ from selenium.common.exceptions import TimeoutException
 import time
 import os
 
-#### Chrome driver version 103.0.5060.134 ####
-#### Chrome browser version 103.0.5060.53 ####
-#### https://chromedriver.storage.googleapis.com/index.html?path=103.0.5060.134/ (Chrome Driver) ####
-#### https://www.slimjet.com/chrome/google-chrome-old-version.php (Chrome Browser) ####
+#### Chrome driver version 114.0.5735.90 ####
+#### Chrome browser version 115.0.5790.171 ####
 
-url = "http://sake09.com/shop/"
+# 홈페이지 -> 일본술 카테고리 이동이 계속 오류나서 url 수정.
+url = 'http://sake09.com/shop/products/list.php?category_id=15'
+
+
+# url = 'http://sake09.com/shop/'
+# chrome_options = webdriver.ChromeOptions()
+# chrome_options.add_argument('--headless')
+# chrome_options.add_argument('--no-sandbox') 
+# chrome_options.add_argument('--disable-dev-shm-usage') 
 driver = webdriver.Chrome()
 driver.get(url)
+
 image_download_path = 'C:\\Users\\qhshd\\sake_project\\dataset\\sake\\images'
-num_of_images_to_save = 20
+images_per_page = 20
+desired_num_of_pages = 3 # 스크래핑할 페이지 조절
 
-# 페이지 좌측에 "일본술" 카테고리 클릭
-iframe = driver.find_element(By.XPATH, '//*[@id="leftcolumn"]/iframe')
-wait = WebDriverWait(driver, 20)
-print('홈페이지에서 iframe 가져오기 성공')
-driver.switch_to.frame(iframe)
-print('iframe으로 driver switching 성공')
-category = driver.find_element(By.PARTIAL_LINK_TEXT, '일본술')
-category.click()
-wait = WebDriverWait(driver, 10)
-print('일본술 페이지로 이동 성공')
-
-# # 추후 드라이버 옵션 설정용. 현재는 작업을 위해 창 띄움.
-# options = webdriver.ChromeOptions()
-# options.add_argument("--headless") 
-# driver = webdriver.Chrome(options=options)
+# # 페이지 좌측에 "일본술" 카테고리 클릭
+# iframe = driver.find_element(By.XPATH, '//*[@id="leftcolumn"]/iframe')
+# wait = WebDriverWait(driver, 20)
+# print('홈페이지에서 iframe 가져오기 성공')
+# driver.switch_to.frame(iframe)
+# print('iframe으로 driver switching 성공')
+# category = driver.find_element(By.PARTIAL_LINK_TEXT, '일본술')
+# category.click()
+# wait = WebDriverWait(driver, 10)
+# print('일본술 페이지로 이동 성공')
 
 
 # 페이지별로 상품 20개씩 있음. -> 사진 / 상품명 스크래핑
 # for 20 상품 - click해서 상세 페이지 - click해서 확대 후 이미지 저장 - back(20 상품 페이지로 이동)
-# 위 loop 끝내면 - 다음페이지 이동 - 끝날 때까지(or num_of_images_to_save 지정)
-# 현재 version에서는 num_of_images_to_save 지정해서 진행 
 
 # category == 일본술 페이지
 image_total_number = 0
-image_index = 0
+current_page = 1
 image_url_list = []
-while image_total_number < num_of_images_to_save:
+
+while current_page <= desired_num_of_pages:
     images = driver.find_elements(By.CLASS_NAME, 'picture')
     if image_total_number >= len(images):
-        break
-    
+        # 다음페이지로 이동(Update the current page number and reset the image_total_number)
+        next_page_link = driver.find_element(By.XPATH, '//a[contains(text(), "次へ>>")]')
+        next_page_link.click()
+        current_page += 1
+        image_total_number = 0
+        continue
+        
     image = images[image_total_number]
     time.sleep(2)
     image.click()  # 상세정보 페이지로 이동
@@ -78,20 +84,14 @@ while image_total_number < num_of_images_to_save:
     
     # Increase the image_total_number after each iteration
     # Go back to the list of images
-   
-print(image_url_list)
-print(len(image_url_list))
-time.sleep(2)
-driver.quit()
-            
-                   
-        # image_to_download = driver.find_element(By.TAG_NAME, 'img')  # 실제로 다운받을 element
-        # image_url = image_to_download.get_attribute('src') # 다운받을 url 따오기
-        # image_filename =  os.path.join(image_download_path, f'test_{image_total_number+1:04d}.jpg') # filename 지정
-        # response = requests.get(image_url)
-        # with open(image_filename, 'wb') as f:
-        #     f.write(response.content)
-        # image_total_number += 1
-        # driver.back()
-        
+                           
+    # image_to_download = driver.find_element(By.TAG_NAME, 'img')  # 실제로 다운받을 element
+    # image_url = image_to_download.get_attribute('src') # 다운받을 url 따오기
+    # image_filename =  os.path.join(image_download_path, f'test_{image_total_number+1:04d}.jpg') # filename 지정
+    # response = requests.get(image_url)
+    # with open(image_filename, 'wb') as f:
+    #     f.write(response.content)
+    # image_total_number += 1
+    # driver.back()
+    
    
