@@ -1,4 +1,4 @@
-# import requests
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import ActionChains
 import time
+import os
 
 
 # import os
@@ -104,21 +105,22 @@ while current_page <= desired_num_of_pages:
         driver.back()
         print('일본술 페이지로 뒤로가기 성공')
         image_index += 1
-        print(f'현재 image 개수: {image_index + (current_page-1)*images_per_page}')
+        print(f'현재 URL 개수: {image_index + (current_page-1)*images_per_page}')
 
     except TimeoutException:
         print("TimeoutException 발생")
         break
     
-print(f'저장된 URL의 개수 : {len(image_url_list)}')    
-         
-# image_to_download = driver.find_element(By.TAG_NAME, 'img')  # 실제로 다운받을 element
-# image_url = image_to_download.get_attribute('src') # 다운받을 url 따오기
-# image_filename =  os.path.join(image_download_path, f'test_{image_index+1:04d}.jpg') # filename 지정
-# response = requests.get(image_url)
-# with open(image_filename, 'wb') as f:
-#     f.write(response.content)
-# image_index += 1
-# driver.back()
-    
+print(f'저장된 URL의 개수 : {len(image_url_list)}')
+print(f'저장된 URL의 개수(중복제외) : {len(set(image_url_list))}')
+
+# URL을 통한 이미지 저장
+# 중복된 URL에 대해서도 이미지를 저장하는게 좋아보임(추후에 사케 이름과 index matching을 위해)
+for index, image_url in enumerate(image_url_list, start=1):
+    image_filename = os.path.join(image_download_path, f'test_{index:04d}.jpg')
+    response = requests.get(image_url)
+    with open(image_filename, 'wb') as f:
+        f.write(response.content)
+print('이미지 다운로드 완료')
+
    
