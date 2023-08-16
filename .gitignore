@@ -6,3 +6,5 @@ log1.txt
 log2.txt
 log4.txt
 *.p
+test_crawling_google/
+test_crawling_sake09/
