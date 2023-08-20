@@ -123,8 +123,9 @@ navigate_to_category_page(0)
 change_disp_number(2)
 
 while True:
-    print('======================================================================================================')
-    print(f'Move to page {current_page}')
+    if __name__ == '__main__':
+        print('======================================================================================================')
+        print(f'Move to page {current_page}')
     extracted_data = [] # for data from one page(~60 items)  
     
     # This is the loop for each category page and its items
@@ -134,11 +135,14 @@ while True:
         navigate_to_item_page(items[index]) # into item info page
         
         text_data = extract_text_data()
-        print(f'Index[{index}] - text extraction success', end='\t')
+        if __name__ == '__main__':
+            print(f'Index[{index}] - text extraction success', end='\t')
         image_url = get_zoomed_image_url()
-        print('url extraction success', end='\t')
+        if __name__ == '__main__':
+            print('url extraction success', end='\t')
         extracted_data.append((text_data, image_url))
-        print("(text, url) appended")
+        if __name__ == '__main__':
+            print("(text, url) appended")
         driver.back()   # out of item info page -> into category page
     
     # update all-extracted_data and save as pickle
@@ -155,8 +159,10 @@ while True:
        
     except NoSuchElementException:
         break
-
-print('Scraping complete:')
-print(f'Total page: {current_page}')
-print(f'# of dataset: {number_of_data_saved}')
+    
+if __name__ == '__main__':
+    print('Scraping complete:')
+    print(f'Total page: {current_page}')
+    print(f'# of dataset: {number_of_data_saved}')
+    
 driver.quit()
