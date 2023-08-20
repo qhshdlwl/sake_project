@@ -6,3 +6,4 @@ test_crawling_sake09/
 raw_sample_dataset/
 temporary/
 log.txt
+scraper_prototype.py
