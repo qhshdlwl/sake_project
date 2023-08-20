@@ -3,5 +3,6 @@ scraping_test.mp4
 *.p
 test_crawling_google/
 test_crawling_sake09/
-raw_sample_dataset/sake/images/deleted/
+raw_sample_dataset/
 temporary/
+log.txt
