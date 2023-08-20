@@ -117,37 +117,42 @@ all_extracted_data = [] # uploaded at the end of each page
 current_page = 1
 number_of_data_saved = 0
 
-# scraping the items in 일본술 category / diplay 60 items per page
+# scraping the items in 일본술 category 
+# diplay 20 items per page (60-items-display raises error)
 navigate_to_category_page(0)
 change_disp_number(2)
 
-while current_page < 3:
+while True:
+    print('======================================================================================================')
+    print(f'Move to page {current_page}')
     extracted_data = [] # for data from one page(~60 items)  
-    # This is the loop for each category page and its items
     
+    # This is the loop for each category page and its items
     items = get_items_list()
-    for item in items:
-        navigate_to_item_page(item) # into item info page
+    for index in range(len(items)):
+        items = get_items_list() # re-fatch the items each iteration
+        navigate_to_item_page(items[index]) # into item info page
         
-        # text_data = extract_text_data()
-        # image_url = get_zoomed_image_url()
-        # extracted_data.append((text_data, image_url))
-
+        text_data = extract_text_data()
+        print(f'Index[{index}] - text extraction success', end='\t')
+        image_url = get_zoomed_image_url()
+        print('url extraction success', end='\t')
+        extracted_data.append((text_data, image_url))
+        print("(text, url) appended")
         driver.back()   # out of item info page -> into category page
     
-    # all_extracted_data += extracted_data
-    # with open('Raw_dataset.p', 'wb') as f:
-    #         pickle.dump(all_extracted_data, f)
-    #         number_of_data_saved = len(f)
-    # print(f'Extracted_data saved as pickle ~ page {current_page}')
+    # update all-extracted_data and save as pickle
+    all_extracted_data += extracted_data
+    number_of_data_saved = len(all_extracted_data)
+    with open('Raw_dataset_test.p', 'wb') as f:
+            pickle.dump(all_extracted_data, f)
+    print(f'Extracted_data ~ page {current_page} saved as pickle ')
 
     try:
         next_page_button = driver.find_element(By.XPATH, '//a[contains(text(), "次へ>>")]')
-        if next_page_button:
-            current_page += 1
-            next_page_button.click()
-        else:
-            break
+        next_page_button.click()
+        current_page += 1
+       
     except NoSuchElementException:
         break
 
